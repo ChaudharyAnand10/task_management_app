@@ -38,30 +38,26 @@ class SingleTaskScreen extends StatelessWidget {
   onTap: () {
     taskController.toggleTaskStatus(tasktable);
   },
-  child: Container(
-    margin: const EdgeInsets.only(top: 4),
-    height: 22,
-    width: 22,
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
+  child:AnimatedContainer(
+  duration: const Duration(milliseconds: 300),
+  height: 22,
+  width: 22,
+  decoration: BoxDecoration(
+    shape: BoxShape.circle,
+    color: tasktable.isCompleted
+        ? Colors.green
+        : Colors.transparent,
+    border: Border.all(
       color: tasktable.isCompleted
-          ? Colors.green
-          : Colors.transparent,
-      border: Border.all(
-        color: tasktable.isCompleted
-            ? Colors.black
-            : Colors.grey,
-        width: 2,
-      ),
+          ? Colors.black
+          : Colors.grey,
+      width: 2,
     ),
-    child: tasktable.isCompleted
-        ? const Icon(
-            Icons.check,
-            size: 14,
-            color: Colors.black, 
-          )
-        : null,
   ),
+  child: tasktable.isCompleted
+      ? const Icon(Icons.check, size: 14)
+      : null,
+)
 ), 
 
           const SizedBox(width: 12),
