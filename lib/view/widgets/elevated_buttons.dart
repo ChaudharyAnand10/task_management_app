@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:task_management_system/controller/task_contoller.dart';
-import 'package:task_management_system/main_screen.dart';
-import 'package:task_management_system/view/pages/all_task_page.dart';
-import 'package:task_management_system/view/pages/priority_wise_task_page.dart';
 
 class CustomElevatedButton extends StatelessWidget {
   final String title;
@@ -22,12 +19,6 @@ class CustomElevatedButton extends StatelessWidget {
           ()=> ElevatedButton(
             onPressed: () {
   taskController.fetchCategoryTask(title);
-
-  if (title.toLowerCase() == 'all') {
-    Get.offAll(() => MainScreen());
-  } else {
-    Get.offAll(() => PriorityTaskScreen());
-  }
 },
               
             

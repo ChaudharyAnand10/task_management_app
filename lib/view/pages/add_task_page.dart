@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:task_management_system/controller/task_contoller.dart';
+import 'package:task_management_system/data/app_database.dart';
 import 'package:task_management_system/view/widgets/select_date_screen.dart';
 import 'package:task_management_system/view/widgets/radio_widget.dart';
 
 class AddTaskScreen extends StatefulWidget {
-  const AddTaskScreen({super.key});
+  final TaskTable? task;
+  AddTaskScreen({super.key, this.task});
 
   @override
   State<AddTaskScreen> createState() => _AddTaskScreenState();
@@ -24,12 +26,45 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   taskController.selectedPriority.value = '';
   taskController.selectedDueDate.value = null;
 }
+  @override
+void initState() {
+  super.initState();
+
+  if (widget.task != null) {
+    titleController.text = widget.task!.title;
+
+    descriptionController.text =
+        widget.task!.description ?? '';
+
+    taskController.selectedPriority.value =
+        widget.task!.priority;
+
+    taskController.selectedDueDate.value =
+        widget.task!.dueDate;
+  } else {
+    taskController.selectedPriority.value = '';
+    taskController.selectedDueDate.value = null;
+  }
+}
+
+@override
+void dispose() {
+  titleController.dispose();
+  descriptionController.dispose();
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add task'),
+        title: Text(
+      widget.task == null
+      ? 'Add Task'
+      : 'Update Task',
+      ),
         centerTitle: true,
         backgroundColor: Colors.amber,
       ),
@@ -89,18 +124,36 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         () => SizedBox(
           height: 50,
           child: ElevatedButton(
-            onPressed: taskController.isAdded.value
-                ? null
-                : () async {
-                    final isSuccess = await taskController.addTask(
-                      titleController.text,
-                      descriptionController.text,
-                    );
+          onPressed: taskController.isAdded.value
+    ? null
+    : () async {
 
-                    if (isSuccess) {
-                      clearFields();
-                    }
-                  },
+        if (widget.task == null) {
+
+          // Add Task
+          final isSuccess = await taskController.addTask(
+            titleController.text,
+            descriptionController.text,
+          );
+
+          if (isSuccess) {
+            clearFields();
+          }
+
+        } else {
+
+          // Update Task
+          await taskController.updateTask(
+            id: widget.task!.id,
+            title: titleController.text,
+            description: descriptionController.text,
+            priority: taskController.selectedPriority.value,
+            dueDate: taskController.selectedDueDate.value!,
+          );
+
+          Get.back(); // update hone ke baad screen band
+        }
+      },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.amber,
               shape: RoundedRectangleBorder(
@@ -116,8 +169,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                       color: Colors.white,
                     ),
                   )
-                : const Text(
-                    'Add Task',
+                :  Text(
+                    widget.task == null
+                    ? 'Add Task'
+                    : 'Update Task',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,

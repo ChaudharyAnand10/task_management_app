@@ -9,9 +9,13 @@ class TaskController extends GetxController {
   RxList<TaskTable> allTask = <TaskTable>[].obs;
   final AppDatabase db = Get.find<AppDatabase>();
 
-  RxList<TaskTable> prioritywisetask = <TaskTable>[].obs;
 
   RxString selectedbtnPriority = 'all'.obs;
+  RxList<TaskTable> displayedTasks = <TaskTable>[].obs;
+
+
+
+  RxString searchQuery = ''.obs;
 
   @override
   void onInit() {
@@ -67,8 +71,12 @@ class TaskController extends GetxController {
   }
 
   Future<void> getAllTask() async {
-    List<TaskTable> alltask = await db.select(db.taskTables).get();
-    allTask.assignAll(alltask);
+     final tasks = await db.select(db.taskTables).get();
+
+    allTask.assignAll(tasks);
+    displayedTasks.assignAll(tasks); //
+
+  applyFilters();
   }
 
   Future<void> toggleTaskStatus(TaskTable task) async {
@@ -95,16 +103,70 @@ class TaskController extends GetxController {
   }
 
   Future<void> fetchCategoryTask(String title) async {
-    selectedbtnPriority.value = title;
+     selectedbtnPriority.value = title;
+  applyFilters();
 
-    if (title.toLowerCase() == 'all') {
-      return;
-    } else {
-      prioritywisetask.assignAll(
-        allTask.where(
-          (task) => task.priority.toLowerCase() == title.toLowerCase(),
-        ),
-      );
-    }
   }
+
+
+
+  void searchTask(String query) {
+  searchQuery.value = query;
+  applyFilters();
+}
+
+
+
+
+  void applyFilters() {
+  Iterable<TaskTable> filtered = allTask;
+
+  // Priority filter
+  if (selectedbtnPriority.value != 'all') {
+    filtered = filtered.where(
+      (e) =>
+          e.priority.toLowerCase() ==
+          selectedbtnPriority.value.toLowerCase(),
+    );
+  }
+
+  // Search filter
+  if (searchQuery.value.trim().isNotEmpty) {
+    filtered = filtered.where(
+      (e) =>
+          e.title.toLowerCase().contains(
+                searchQuery.value.toLowerCase(),
+              ) ||
+          e.description!.toLowerCase().contains(
+                searchQuery.value.toLowerCase(),
+              ),
+    );
+  }
+
+  displayedTasks.assignAll(filtered);
+}
+
+
+Future<void> updateTask({
+  required int id,
+  required String title,
+  required String description,
+  required String priority,
+  required DateTime dueDate,
+}) async {
+
+  await (db.update(db.taskTables)
+        ..where((tbl) => tbl.id.equals(id)))
+      .write(
+    TaskTablesCompanion(
+      title: d.Value(title),
+      description: d.Value(description),
+      priority: d.Value(priority),
+      dueDate: d.Value(dueDate),
+    ),
+  );
+
+  await getAllTask();
+}
+
 }

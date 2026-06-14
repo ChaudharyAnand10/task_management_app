@@ -12,7 +12,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int selectedIndex = 0;
 
-  final List<Widget> pages = const [TaskScreen(), AddTaskScreen()];
+  final List<Widget> pages =  [TaskScreen(), AddTaskScreen()];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
