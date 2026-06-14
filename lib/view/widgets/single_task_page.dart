@@ -33,21 +33,36 @@ class SingleTaskScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Circle
-          GestureDetector(
-            onTap: () {
-              taskController.toggleTaskStatus(tasktable);
-            },
-            child: Container(
-              margin: const EdgeInsets.only(top: 4),
-              height: 22,
-              width: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey, width: 2),
-              ),
-            ),
-          ),
+        
+         GestureDetector(
+  onTap: () {
+    taskController.toggleTaskStatus(tasktable);
+  },
+  child: Container(
+    margin: const EdgeInsets.only(top: 4),
+    height: 22,
+    width: 22,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: tasktable.isCompleted
+          ? Colors.green
+          : Colors.transparent,
+      border: Border.all(
+        color: tasktable.isCompleted
+            ? Colors.black
+            : Colors.grey,
+        width: 2,
+      ),
+    ),
+    child: tasktable.isCompleted
+        ? const Icon(
+            Icons.check,
+            size: 14,
+            color: Colors.black, 
+          )
+        : null,
+  ),
+), 
 
           const SizedBox(width: 12),
 
@@ -55,7 +70,7 @@ class SingleTaskScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// Title + Priority
+                
                 Row(
                   children: [
                     Expanded(
@@ -87,7 +102,7 @@ class SingleTaskScreen extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                /// Description
+                
                 Text(
                   tasktable.description ?? "",
                   maxLines: 5,
@@ -97,7 +112,7 @@ class SingleTaskScreen extends StatelessWidget {
 
                 const SizedBox(height: 14),
 
-                /// Bottom Row
+              
                 Row(
                   children: [
                     /// Status
@@ -125,7 +140,7 @@ class SingleTaskScreen extends StatelessWidget {
 
                     const SizedBox(width: 10),
 
-                    /// Date
+                    
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -150,7 +165,7 @@ class SingleTaskScreen extends StatelessWidget {
 
                     const Spacer(),
 
-                    /// Delete
+                    
                     IconButton(
                       onPressed: () {
                         taskController.deleteTask(tasktable.id);

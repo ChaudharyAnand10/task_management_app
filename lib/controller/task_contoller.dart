@@ -32,6 +32,12 @@ class TaskController extends GetxController {
       return false;
     }
 
+    if (description.trim().isEmpty) {
+      Get.snackbar('Error', 'Please enter title');
+      isAdded.value = false;
+      return false;
+    }
+
     if (selectedPriority.value.isEmpty) {
       Get.snackbar('Error', 'Please select priority');
       isAdded.value = false;
@@ -113,7 +119,7 @@ class TaskController extends GetxController {
   void searchTask(String query) {
   searchQuery.value = query;
   applyFilters();
-}
+   }
 
 
 
@@ -121,7 +127,7 @@ class TaskController extends GetxController {
   void applyFilters() {
   Iterable<TaskTable> filtered = allTask;
 
-  // Priority filter
+  
   if (selectedbtnPriority.value != 'all') {
     filtered = filtered.where(
       (e) =>
@@ -130,7 +136,7 @@ class TaskController extends GetxController {
     );
   }
 
-  // Search filter
+ 
   if (searchQuery.value.trim().isNotEmpty) {
     filtered = filtered.where(
       (e) =>

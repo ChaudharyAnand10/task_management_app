@@ -28,149 +28,118 @@ class _TaskScreenState extends State<TaskScreen> {
         children: [
           SizedBox(height: 20),
 
-         Padding(
-  padding: const EdgeInsets.all(13),
-  child: Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(
-        color: Colors.black12,
-      ),
-      boxShadow: const [
-        BoxShadow(
-          color: Colors.black12,
-          blurRadius: 6,
-          offset: Offset(0, 2),
-        ),
-      ],
-    ),
-    child: TextField(
-  controller: serchController,
-  onChanged: (value) {
-    taskController.searchTask(value);
-  },
-  decoration: const InputDecoration(
-    hintText: 'Search task...',
-    prefixIcon: Icon(Icons.search),
-    border: InputBorder.none,
-    contentPadding: EdgeInsets.symmetric(
-      vertical: 14,
-    ),
-  ),
-),
-  ),
-),
+          Padding(
+            padding: const EdgeInsets.all(13),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.black12),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: serchController,
+                onChanged: (value) {
+                  taskController.searchTask(value);
+                },
+                decoration: const InputDecoration(
+                  hintText: 'Search task...',
+                  prefixIcon: Icon(Icons.search),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+          ),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              CustomElevatedButton(
-                title: 'all',
-               
-              ),
-              CustomElevatedButton(title: 'high',),
-              CustomElevatedButton(title: 'medium', ),
-              CustomElevatedButton(title: 'low', ),
+              CustomElevatedButton(title: 'all'),
+              CustomElevatedButton(title: 'high'),
+              CustomElevatedButton(title: 'medium'),
+              CustomElevatedButton(title: 'low'),
             ],
           ),
-
-          // Expanded(
-          //   child: Obx(
-          //     () => ListView.builder(
-          //       itemCount: taskController.displayedTasks.length,
-          //       itemBuilder: (context, index) {
-          //         final task = taskController.displayedTasks[index];
-
-          //         return SingleTaskScreen(tasktable: task);
-          //       },
-          //     ),
-          //   ),
-          // ),
-
-
-
           Expanded(
-  child: Obx(
-    () => ListView.builder(
-      itemCount: taskController.displayedTasks.length,
+            child: Obx(() {
+              if (taskController.displayedTasks.isEmpty) {
+                return Center(
+                  child: Text(
+                    taskController.searchQuery.value.isEmpty
+                        ? "No tasks available"
+                        : "No matching tasks found",
+                  ),
+                );
+              }
+              return ListView.builder(
+                itemCount: taskController.displayedTasks.length,
 
-      itemBuilder: (context, index) {
+                itemBuilder: (context, index) {
+                  final task = taskController.displayedTasks[index];
 
-        final task =
-            taskController.displayedTasks[index];
+                  return Dismissible(
+                    key: ValueKey(task.id),
 
-        return Dismissible(
+                    background: Container(
+                      color: const Color.fromARGB(255, 167, 76, 69),
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.only(right: 20),
+                      child: Icon(Icons.delete, color: Colors.white),
+                    ),
 
-          key: ValueKey(task.id),
+                    onDismissed: (_) async {
+                      final deletedTask = task;
 
-          background: Container(
-            color: const Color.fromARGB(255, 167, 76, 69),
-            alignment: Alignment.centerRight,
-            padding: EdgeInsets.only(right: 20),
-            child: Icon(
-              Icons.delete,
-              color: Colors.white,
-            ),
-          ),
+                      taskController.displayedTasks.remove(task);
 
-          onDismissed: (_) async {
+                      final result = await ScaffoldMessenger.of(context)
+                          .showSnackBar(
+                            SnackBar(
+                              content: Text('Task deleted'),
 
-            final deletedTask = task;
+                              duration: Duration(seconds: 3),
 
-            taskController.displayedTasks.remove(task);
+                              action: SnackBarAction(
+                                label: 'UNDO',
 
-            final result =
-                await ScaffoldMessenger.of(context)
-                    .showSnackBar(
+                                onPressed: () {
+                                  taskController.displayedTasks.insert(
+                                    index,
+                                    deletedTask,
+                                  );
+                                },
+                              ),
+                            ),
+                          )
+                          .closed;
 
-              SnackBar(
-                content: Text('Task deleted'),
+                      if (result != SnackBarClosedReason.action) {
+                        await taskController.deleteTask(deletedTask.id);
+                      }
+                    },
 
-                duration: Duration(seconds: 3),
-
-                action: SnackBarAction(
-                  label: 'UNDO',
-
-                  onPressed: () {
-                    taskController.displayedTasks
-                        .insert(
-                      index,
-                      deletedTask,
-                    );
-                  },
-                ),
-              ),
-
-            ).closed;
-
-            if (result !=
-                SnackBarClosedReason.action) {
-
-              await taskController.deleteTask(
-                deletedTask.id,
+                    child: InkWell(
+                      onTap: () {
+                        if (task.isCompleted) {
+                          Get.snackbar('done', 'This task is completed');
+                          return;
+                        }
+                        Get.to(() => AddTaskScreen(task: task));
+                      },
+                      child: SingleTaskScreen(tasktable: task),
+                    ),
+                  );
+                },
               );
-
-            }
-          },
-
-          child: InkWell(
-  onTap: () {
-    Get.to(
-      () => AddTaskScreen(
-        task: task,
-      ),
-    );
-  },
-  child: SingleTaskScreen(
-    tasktable: task,
-  ),
-),
-        );
-      },
-    ),
-  ),
-)
+            }),
+          ),
         ],
       ),
     );
